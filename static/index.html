@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Decision Graveyard Agent</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--border:#2a2d3e;--text:#e2e8f0;
+  --muted:#64748b;--accent:#6366f1;--accent2:#818cf8;
+  --high:#ef4444;--medium:#f59e0b;--low:#22c55e;--blue:#3b82f6;
+  --r:12px;--sh:0 4px 24px rgba(0,0,0,.4);
+}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;font-size:15px;line-height:1.6;min-height:100vh}
+.shell{max-width:960px;margin:0 auto;padding:24px 16px 80px}
+
+/* header */
+.hdr{text-align:center;margin-bottom:28px}
+.hdr h1{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.hdr p{color:var(--muted);font-size:.93rem}
+
+/* tabs */
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:5px;margin-bottom:24px}
+.tab{flex:1;padding:9px 6px;border:none;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;font-size:.85rem;font-weight:500;transition:all .15s}
+.tab:hover{color:var(--text)}.tab.active{background:var(--accent);color:#fff}
+
+/* card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:18px;box-shadow:var(--sh)}
+.ct{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px}
+
+/* forms */
+textarea,input[type=text],input[type=date],select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 13px;font-size:.92rem;font-family:inherit;resize:vertical;outline:none;transition:border-color .15s}
+textarea:focus,input:focus,select:focus{border-color:var(--accent)}
+.row{display:flex;gap:12px}.row>*{flex:1}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:.78rem;font-weight:500;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border:none;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{background:#4f46e5}
+.btn-s{background:var(--border);color:var(--text)}.btn-s:hover{background:#3a3d52}
+.btn-d{background:#991b1b;color:#fff}.btn-d:hover{background:var(--high)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.brow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
+/* badges */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.bh{background:rgba(239,68,68,.15);color:var(--high)}
+.bm{background:rgba(245,158,11,.15);color:var(--medium)}
+.bl{background:rgba(34,197,94,.15);color:var(--low)}
+.bn{background:rgba(59,130,246,.15);color:var(--blue)}
+
+/* verdict */
+.verdict{border-radius:10px;padding:16px 18px;margin-bottom:18px;font-weight:500}
+.v-high{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.35)}
+.v-med{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.35)}
+.v-new{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3)}
+.v-empty{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+
+/* live status bar */
+.status-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);font-size:.83rem;color:var(--accent2);margin-bottom:14px}
+.status-bar.hidden{display:none!important}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* match card */
+.match{border:1px solid var(--border);border-radius:10px;padding:15px 17px;margin-bottom:11px;background:var(--bg);animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.mhdr{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.mid{font-size:.82rem;font-weight:700;color:var(--accent2);font-family:monospace}
+.mbody p{font-size:.87rem;color:var(--muted);margin-bottom:4px}
+.mbody strong{color:var(--text)}
+.mexcerpt{font-size:.82rem;color:var(--muted);border-left:3px solid var(--border);padding-left:9px;margin-top:9px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+
+/* rejected section */
+.rej-toggle{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:.82rem;padding:7px 13px;cursor:pointer;width:100%;text-align:left;margin-top:16px}
+.rej-toggle:hover{border-color:var(--accent);color:var(--text)}
+.rej-item{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);font-size:.82rem;color:var(--muted)}
+.rej-item:last-child{border-bottom:none}
+.rid{color:var(--accent2);font-family:monospace;min-width:76px}
+
+/* stats grid */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+.sbox{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.snum{font-size:1.9rem;font-weight:700;line-height:1;margin-bottom:4px}
+.slbl{font-size:.73rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.c-accent .snum{color:var(--accent2)}.c-red .snum{color:var(--high)}.c-yel .snum{color:var(--medium)}.c-grn .snum{color:var(--low)}.c-blue .snum{color:var(--blue)}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;color:var(--muted);font-weight:600;padding:7px 9px;border-bottom:1px solid var(--border);font-size:.73rem;text-transform:uppercase}
+td{padding:9px 9px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.snip{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* example chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{background:rgba(99,102,241,.14);color:var(--accent2);font-size:.75rem;padding:3px 10px;border-radius:20px;cursor:pointer;transition:background .15s}
+.chip:hover{background:rgba(99,102,241,.28)}
+
+/* spinner */
+.spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* toast */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:.87rem;box-shadow:var(--sh);opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;max-width:320px;z-index:999}
+.toast.show{opacity:1;transform:translateY(0)}
+.tok{border-color:var(--low)}.terr{border-color:var(--high)}
+
+/* misc */
+.hidden{display:none!important}
+.dim{color:var(--muted);font-size:.82rem}
+.center{text-align:center}
+hr{border:none;border-top:1px solid var(--border);margin:18px 0}
+.mt{margin-top:14px}
+.stitle{font-size:.82rem;font-weight:600;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="hdr">
+  <h1>&#9904;&#65039; Decision Graveyard</h1>
+  <p>Every company re-argues decisions it already made. This agent remembers why they failed.</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw('query')">&#128269; Check Proposal</button>
+  <button class="tab" onclick="sw('dashboard')">&#128202; Debt Dashboard</button>
+  <button class="tab" onclick="sw('log')">&#128203; Candidate Log</button>
+  <button class="tab" onclick="sw('ingest')">&#128229; Ingest Decision</button>
+  <button class="tab" onclick="sw('setup')">&#9881;&#65039; Setup</button>
+</div>
+
+<!-- ============ TAB: QUERY ============ -->
+<div id="tab-query">
+  <div class="card">
+    <div class="ct">New Proposal</div>
+    <div class="field">
+      <label>Describe the proposal you are about to make</label>
+      <textarea id="proposal" rows="4"
+        placeholder="e.g. We want to deploy a fully automated chatbot to handle all tier-1 support tickets without any human oversight..."></textarea>
+    </div>
+    <div class="brow">
+      <button class="btn btn-p" id="qbtn" onclick="runCheck()">
+        <span id="qspin" class="spin hidden"></span>Check the Graveyard
+      </button>
+      <button class="btn btn-s" onclick="clearQ()">Clear</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Quick examples</div>
+    <div class="chips">
+      <span class="chip" onclick="load(this)">Automated chatbot — no human fallback</span>
+      <span class="chip" onclick="load(this)">AI chatbot with human escalation path</span>
+      <span class="chip" onclick="load(this)">Outbound cold-calling for enterprise leads</span>
+      <span class="chip" onclick="load(this)">Migrate all services into a monorepo</span>
+      <span class="chip" onclick="load(this)">Fully serverless order-processing pipeline</span>
+      <span class="chip" onclick="load(this)">Flash 40% sitewide discount to hit quarterly revenue</span>
+      <span class="chip" onclick="load(this)">Mandatory account creation before checkout</span>
+      <span class="chip" onclick="load(this)">Switch fulfillment partner to cut shipping cost</span>
+    </div>
+  </div>
+
+  <div id="results" class="hidden">
+    <!-- Live status bar — shown while streaming -->
+    <div id="status-bar" class="status-bar hidden">
+      <span class="dot"></span>
+      <span id="status-msg">Checking...</span>
+    </div>
+
+    <div id="verdict" class="verdict hidden"></div>
+
+    <div id="surfaced-sec" class="hidden">
+      <div class="stitle" id="surf-lbl">Matches from the Graveyard</div>
+      <div id="surf-list"></div>
+    </div>
+
+    <div id="rej-sec" class="hidden">
+      <button class="rej-toggle" onclick="togRej()">
+        <span id="rej-lbl">Show reviewed-but-not-flagged candidates (transparency log)</span>
+      </button>
+      <div id="rej-list" class="hidden" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB: DASHBOARD ============ -->
+<div id="tab-dashboard" class="hidden">
+  <div class="card">
+    <div class="ct">Decision Debt Score</div>
+    <div class="sgrid">
+      <div class="sbox c-accent"><div class="snum" id="s0">—</div><div class="slbl">Proposals Reviewed</div></div>
+      <div class="sbox c-red">  <div class="snum" id="s1">—</div><div class="slbl">Near-Repeats Caught</div></div>
+      <div class="sbox c-red">  <div class="snum" id="s2">—</div><div class="slbl">High Confidence</div></div>
+      <div class="sbox c-yel">  <div class="snum" id="s3">—</div><div class="slbl">Medium Confidence</div></div>
+      <div class="sbox c-blue"> <div class="snum" id="s4">—</div><div class="slbl">New Territory</div></div>
+    </div>
+    <p id="s-sum" class="dim center"></p>
+  </div>
+  <div class="card">
+    <div class="ct">Recent Queries</div>
+    <table><thead><tr><th>Time</th><th>Proposal</th><th>Result</th><th>Matched</th></tr></thead>
+    <tbody id="dash-tbody"><tr><td colspan="4" class="center dim">No queries yet.</td></tr></tbody></table>
+    <div class="brow mt"><button class="btn btn-s" onclick="loadDash()">Refresh</button></div>
+  </div>
+</div>
+
+<!-- ============ TAB: CANDIDATE LOG ============ -->
+<div id="tab-log" class="hidden">
+  <div class="card">
+    <div class="ct">Full Candidate Evaluation Log</div>
+    <p class="dim" style="margin-bottom:14px">Every candidate Hindsight retrieved and the LLM evaluated — including rejected ones.</p>
+    <div class="sgrid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="sbox c-accent"><div class="snum" id="l0">—</div><div class="slbl">Total Evaluated</div></div>
+      <div class="sbox c-red">  <div class="snum" id="l1">—</div><div class="slbl">Surfaced</div></div>
+      <div class="sbox c-grn">  <div class="snum" id="l2">—</div><div class="slbl">Rejected</div></div>
+    </div>
+    <table>
+      <thead><tr><th>Time</th><th>Proposal</th><th>Decision</th><th>Confidence</th><th>Surfaced?</th><th>Explanation</th></tr></thead>
+      <tbody id="log-tbody"><tr><td colspan="6" class="center dim">No evaluations yet.</td></tr></tbody>
+    </table>
+    <div class="brow mt"><button class="btn btn-s" onclick="loadLog()">Refresh</button></div>
+  </div>
+</div>
+
+<!-- ============ TAB: INGEST ============ -->
+<div id="tab-ingest" class="hidden">
+  <div class="card">
+    <div class="ct">Add a Decision to the Graveyard</div>
+    <div class="field">
+      <label>Paste raw retro doc or Slack thread (optional — click Auto-extract)</label>
+      <textarea id="raw-doc" rows="3" placeholder="Paste retrospective notes, postmortem, or Slack thread..."></textarea>
+    </div>
+    <button class="btn btn-s" onclick="extract()">
+      <span id="espin" class="spin hidden"></span>Auto-extract (demo)
+    </button>
+    <hr/>
+    <div class="row">
+      <div class="field"><label>Decision ID *</label><input type="text" id="i-id" placeholder="DEC-029"/></div>
+      <div class="field"><label>Date *</label><input type="date" id="i-date"/></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Team *</label><input type="text" id="i-team" placeholder="Product, Engineering..."/></div>
+      <div class="field">
+        <label>Outcome *</label>
+        <select id="i-out">
+          <option value="reverted">Reverted</option>
+          <option value="succeeded">Succeeded</option>
+          <option value="abandoned">Abandoned</option>
+          <option value="partially_adopted">Partially adopted</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Proposal *</label><textarea id="i-prop" rows="3" placeholder="What was proposed?"></textarea></div>
+    <div class="field"><label>Reasoning For (one per line)</label><textarea id="i-for" rows="2"></textarea></div>
+    <div class="field"><label>Reasoning Against / Failure Reasons (one per line)</label><textarea id="i-against" rows="2"></textarea></div>
+    <div class="field"><label>Evidence / Metrics</label><textarea id="i-evid" rows="2" placeholder="CSAT dropped to 2.1/5; 340 social media complaints..."></textarea></div>
+    <div class="brow">
+      <button class="btn btn-p" onclick="submitIngest()"><span id="ispin" class="spin hidden"></span>Save to Graveyard</button>
+      <button class="btn btn-s" onclick="clearIngest()">Clear</button>
+    </div>
+    <div id="i-result" class="mt hidden"></div>
+  </div>
+</div>
+
+<!-- ============ TAB: SETUP ============ -->
+<div id="tab-setup" class="hidden">
+  <div class="card">
+    <div class="ct">Server Status</div>
+    <div id="st-body" class="dim center">Loading...</div>
+  </div>
+  <div class="card">
+    <div class="ct">Dataset Management</div>
+    <p class="dim" style="margin-bottom:14px">Load the 28-record Nimbus Retail dataset. Re-loading is idempotent.</p>
+    <div class="brow">
+      <button class="btn btn-p" onclick="loadDS(false)"><span id="lspin" class="spin hidden"></span>Load 28-record Dataset</button>
+      <button class="btn btn-d" onclick="loadDS(true)"><span id="rspin" class="spin hidden"></span>Wipe &amp; Reload</button>
+    </div>
+    <div id="ds-result" class="mt hidden"></div>
+  </div>
+</div>
+
+</div><!-- /shell -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── tab nav ──────────────────────────────────────────────────────────
+const TABS=['query','dashboard','log','ingest','setup'];
+function sw(name){
+  TABS.forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
+  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',TABS[i]===name));
+  if(name==='dashboard') loadDash();
+  if(name==='log')       loadLog();
+  if(name==='setup')     loadStatus();
+}
+
+// ── toast ────────────────────────────────────────────────────────────
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast show '+(type==='ok'?'tok':'terr');
+  setTimeout(()=>el.className='toast',3500);
+}
+
+// ── helpers ──────────────────────────────────────────────────────────
+function load(el){document.getElementById('proposal').value=el.textContent.trim();}
+function clearQ(){
+  document.getElementById('proposal').value='';
+  document.getElementById('results').classList.add('hidden');
+  document.getElementById('surf-list').innerHTML='';
+  document.getElementById('rej-list').innerHTML='';
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ── SSE streaming /check ──────────────────────────────────────────────
+let _es = null;  // active EventSource
+
+function runCheck(){
+  const proposal=document.getElementById('proposal').value.trim();
+  if(!proposal){toast('Enter a proposal first.','err');return;}
+
+  // Reset UI
+  document.getElementById('results').classList.remove('hidden');
+  document.getElementById('verdict').classList.add('hidden');
+  document.getElementById('surfaced-sec').classList.add('hidden');
+  document.getElementById('rej-sec').classList.add('hidden');
+  document.getElementById('surf-list').innerHTML='';
+  document.getElementById('rej-list').innerHTML='';
+
+  const btn=document.getElementById('qbtn');
+  const sp=document.getElementById('qspin');
+  const sb=document.getElementById('status-bar');
+  const sm=document.getElementById('status-msg');
+  btn.disabled=true; sp.classList.remove('hidden');
+  sb.classList.remove('hidden'); sm.textContent='Connecting...';
+
+  // Close any previous stream
+  if(_es){_es.close();_es=null;}
+
+  const url='/check/stream?proposal='+encodeURIComponent(proposal);
+  _es=new EventSource(url);
+
+  _es.addEventListener('status',e=>{
+    const d=JSON.parse(e.data);
+    sm.textContent=d.message||'Processing...';
+  });
+
+  _es.addEventListener('candidate',e=>{
+    const d=JSON.parse(e.data);
+    renderCandidate(d);
+  });
+
+  _es.addEventListener('result',e=>{
+    const d=JSON.parse(e.data);
+    renderFinalVerdict(d);
+  });
+
+  _es.addEventListener('done',e=>{
+    sb.classList.add('hidden');
+    btn.disabled=false; sp.classList.add('hidden');
+    _es.close(); _es=null;
+  });
+
+  _es.addEventListener('error',e=>{
+    sb.classList.add('hidden');
+    btn.disabled=false; sp.classList.add('hidden');
+    toast('Stream error — check console','err');
+    _es.close(); _es=null;
+  });
+
+  // Fallback timeout
+  setTimeout(()=>{
+    if(_es){_es.close();_es=null;btn.disabled=false;sp.classList.add('hidden');sb.classList.add('hidden');}
+  },90000);
+}
+
+// Render a single candidate card as it arrives
+const _surfacedIds=new Set(); const _rejectedIds=new Set();
+function renderCandidate(d){
+  const conf=d.confidence||'low';
+  const isSurfaced=d.surfaced;
+  const target=document.getElementById(isSurfaced?'surf-list':'rej-list');
+
+  if(isSurfaced){
+    document.getElementById('surfaced-sec').classList.remove('hidden');
+    document.getElementById('surf-lbl').textContent='Matches from the Graveyard (live)';
+    const html=`<div class="match" id="m-${esc(d.decision_id)}">
+      <div class="mhdr">
+        <span class="mid">${esc(d.decision_id)}</span>
+        <span class="badge b${conf[0]}">${esc(conf)}</span>
+        <span style="font-size:.75rem;color:var(--muted);margin-left:auto">live</span>
+      </div>
+      <div class="mbody">
+        <p><strong>Same problem?</strong> ${d.same_problem?'Yes':'No'} — ${esc(d.same_problem_reason)}</p>
+        <p><strong>Same failure mode?</strong> ${d.same_failure_mode?'Yes':'No'} — ${esc(d.same_failure_mode_reason)}</p>
+        <p><strong>Confidence:</strong> ${esc(d.confidence_explanation)}</p>
+      </div>
+      <div class="mexcerpt">${esc((d.candidate_text||'').substring(0,280))}...</div>
+    </div>`;
+    target.insertAdjacentHTML('beforeend',html);
+  } else {
+    document.getElementById('rej-sec').classList.remove('hidden');
+    document.getElementById('rej-lbl').textContent=
+      'Show reviewed-but-not-flagged candidates (transparency log)';
+    const html=`<div class="rej-item">
+      <span class="rid">${esc(d.decision_id)}</span>
+      <span>${esc(d.confidence_explanation)}</span>
+    </div>`;
+    target.insertAdjacentHTML('beforeend',html);
+  }
+}
+
+// Render final verdict once stream is complete
+function renderFinalVerdict(d){
+  const v=document.getElementById('verdict');
+  v.classList.remove('hidden');
+  const msg=d.message||'';
+  const hasH=d.surfaced&&d.surfaced.some(e=>e.confidence==='high');
+  const hasM=d.surfaced&&d.surfaced.some(e=>e.confidence==='medium');
+  if(!d.bank_loaded){
+    v.className='verdict v-empty';
+    v.innerHTML=esc(msg)+'<br><small>Load the dataset on the Setup tab first.</small>';
+  }else if(hasH){v.className='verdict v-high';v.textContent='[HIGH] '+msg;}
+  else if(hasM){v.className='verdict v-med'; v.textContent='[MEDIUM] '+msg;}
+  else{v.className='verdict v-new';v.textContent=msg;}
+
+  // Update surf-lbl count
+  if(d.surfaced&&d.surfaced.length)
+    document.getElementById('surf-lbl').textContent=
+      'Matches from the Graveyard ('+d.surfaced.length+')';
+}
+
+let rejOpen=false;
+function togRej(){
+  rejOpen=!rejOpen;
+  document.getElementById('rej-list').classList.toggle('hidden',!rejOpen);
+}
+
+// ── /debt-score ──────────────────────────────────────────────────────
+async function loadDash(){
+  try{
+    const d=await(await fetch('/debt-score')).json();
+    document.getElementById('s0').textContent=d.total_queries;
+    document.getElementById('s1').textContent=d.near_repeats_caught;
+    document.getElementById('s2').textContent=d.high_confidence_catches;
+    document.getElementById('s3').textContent=d.medium_confidence_catches;
+    document.getElementById('s4').textContent=d.new_territory_decisions;
+    document.getElementById('s-sum').textContent=d.summary;
+    const tb=document.getElementById('dash-tbody');
+    if(!d.recent_queries||!d.recent_queries.length){
+      tb.innerHTML='<tr><td colspan="4" class="center dim">No queries yet.</td></tr>';return;
+    }
+    tb.innerHTML=d.recent_queries.map(q=>{
+      const t=new Date(q.timestamp).toLocaleTimeString();
+      const badge=q.caught
+        ?(q.high_confidence?'<span class="badge bh">HIGH</span>':'<span class="badge bm">MED</span>')
+        :(q.new_territory?'<span class="badge bn">New</span>':'<span class="badge bl">No match</span>');
+      const ids=q.matched_ids&&q.matched_ids.length?q.matched_ids.join(', '):'—';
+      return`<tr><td>${t}</td><td><span class="snip">${esc(q.proposal_snippet)}</span></td><td>${badge}</td><td><code style="font-size:.78rem;color:var(--accent2)">${esc(ids)}</code></td></tr>`;
+    }).join('');
+  }catch(e){console.error(e);}
+}
+
+// ── /log ─────────────────────────────────────────────────────────────
+async function loadLog(){
+  try{
+    const d=await(await fetch('/log')).json();
+    document.getElementById('l0').textContent=d.total_candidates_evaluated;
+    document.getElementById('l1').textContent=d.surfaced_count;
+    document.getElementById('l2').textContent=d.rejected_count;
+    const tb=document.getElementById('log-tbody');
+    if(!d.log||!d.log.length){
+      tb.innerHTML='<tr><td colspan="6" class="center dim">No evaluations yet.</td></tr>';return;
+    }
+    tb.innerHTML=d.log.map(e=>{
+      const t=new Date(e.timestamp).toLocaleTimeString();
+      const badge=e.surfaced
+        ?(e.confidence==='high'?'<span class="badge bh">HIGH</span>':'<span class="badge bm">MED</span>')
+        :'<span class="badge bl">rejected</span>';
+      return`<tr>
+        <td>${t}</td>
+        <td><span class="snip">${esc(e.proposal)}</span></td>
+        <td><code style="font-size:.78rem;color:var(--accent2)">${esc(e.decision_id)}</code></td>
+        <td>${badge}</td>
+        <td>${e.surfaced?'Yes':'No'}</td>
+        <td style="max-width:350px;word-wrap:break-word;white-space:normal">${esc(e.explanation)}</td>
+      </tr>`;
+    }).join('');
+  }catch(e){console.error(e);}
+}
+
+// ── ingest ───────────────────────────────────────────────────────────
+function extract(){
+  const sp=document.getElementById('espin');
+  sp.classList.remove('hidden');
+  setTimeout(()=>{
+    sp.classList.add('hidden');
+    const today=new Date().toISOString().split('T')[0];
+    document.getElementById('i-id').value='DEC-029';
+    document.getElementById('i-date').value=today;
+    document.getElementById('i-team').value='Product';
+    document.getElementById('i-out').value='reverted';
+    document.getElementById('i-prop').value='Introduce mandatory two-factor authentication at checkout to reduce fraud.';
+    document.getElementById('i-for').value='Fraud rates increased 15% in Q3\nRegulatory compliance requirements';
+    document.getElementById('i-against').value='Checkout conversion dropped 8% in first week\nMobile users had disproportionate friction';
+    document.getElementById('i-evid').value='Conversion dashboard; 3,200 abandoned carts cited auth friction in exit survey';
+    toast('Form pre-filled — review and save!');
+  },700);
+}
+
+async function submitIngest(){
+  const sp=document.getElementById('ispin'),res=document.getElementById('i-result');
+  const fields={
+    decision_id:document.getElementById('i-id').value.trim(),
+    date:document.getElementById('i-date').value,
+    team:document.getElementById('i-team').value.trim(),
+    outcome:document.getElementById('i-out').value,
+    proposal:document.getElementById('i-prop').value.trim(),
+    reasoning_for:document.getElementById('i-for').value.trim().split('\n').filter(Boolean),
+    reasoning_against:document.getElementById('i-against').value.trim().split('\n').filter(Boolean),
+    evidence:document.getElementById('i-evid').value.trim(),
+  };
+  if(!fields.decision_id||!fields.proposal||!fields.date){toast('ID, date and proposal are required.','err');return;}
+  sp.classList.remove('hidden');
+  try{
+    const r=await fetch('/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(fields)});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.detail||'Failed');
+    res.classList.remove('hidden');
+    res.innerHTML='<span style="color:var(--low)">Saved: '+esc(data.message)+'</span>';
+    toast('Saved to graveyard!');
+  }catch(e){
+    res.classList.remove('hidden');
+    res.innerHTML='<span style="color:var(--high)">Error: '+esc(e.message)+'</span>';
+    toast('Error: '+e.message,'err');
+  }finally{sp.classList.add('hidden');}
+}
+
+function clearIngest(){
+  ['i-id','i-date','i-team','i-prop','i-for','i-against','i-evid','raw-doc']
+    .forEach(id=>document.getElementById(id).value='');
+  document.getElementById('i-out').value='reverted';
+  document.getElementById('i-result').classList.add('hidden');
+}
+
+// ── status + dataset ──────────────────────────────────────────────────
+async function loadStatus(){
+  const body=document.getElementById('st-body');
+  try{
+    const d=await(await fetch('/status')).json();
+    const ok=s=>s?'Yes':'No';
+    body.innerHTML=`<table>
+      <tr><td style="padding:5px 0;color:var(--muted)">Hindsight URL</td><td>${esc(d.hindsight_url)}</td></tr>
+      <tr><td style="padding:5px 0;color:var(--muted)">Hindsight reachable</td><td>${ok(d.hindsight_reachable)}</td></tr>
+      <tr><td style="padding:5px 0;color:var(--muted)">Hindsight API key</td><td>${d.hindsight_key_set?'Set':'Not set'}</td></tr>
+      <tr><td style="padding:5px 0;color:var(--muted)">Bank / Documents</td><td>${esc(d.bank_id)} / ${d.documents_stored} facts ${d.bank_loaded?'(loaded)':'(empty)'}</td></tr>
+      <tr><td style="padding:5px 0;color:var(--muted)">Groq key / model</td><td>${d.groq_key_set?'Set':'Not set'} / ${esc(d.groq_model)}</td></tr>
+      <tr><td style="padding:5px 0;color:var(--muted)">LLM mode</td><td>${esc(d.llm_mode)}</td></tr>
+      <tr><td style="padding:5px 0;color:var(--muted)">Redis cache</td><td>${d.cache&&d.cache.enabled?'Connected ('+esc(d.cache.version)+')':'Disabled (graceful fallback)'}</td></tr>
+      <tr><td style="padding:5px 0;color:var(--muted)">Auth</td><td>${d.auth&&d.auth.auth_enabled?'API key required':'Open (no auth configured)'}</td></tr>
+    </table>`;
+  }catch(e){body.innerHTML='<span style="color:var(--high)">Cannot reach backend. Run: python main.py</span>';}
+}
+
+async function loadDS(clearFirst){
+  const sp=document.getElementById(clearFirst?'rspin':'lspin');
+  const res=document.getElementById('ds-result');
+  sp.classList.remove('hidden');res.classList.add('hidden');
+  try{
+    const r=await fetch('/ingest/dataset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clear_first:clearFirst})});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.detail||'Failed');
+    res.classList.remove('hidden');
+    res.innerHTML='<span style="color:var(--low)">'+esc(data.message)+'</span>';
+    toast(data.message);loadStatus();
+  }catch(e){
+    res.classList.remove('hidden');
+    res.innerHTML='<span style="color:var(--high)">Error: '+esc(e.message)+'</span>';
+    toast('Error: '+e.message,'err');
+  }finally{sp.classList.add('hidden');}
+}
+
+// init
+document.getElementById('i-date').value=new Date().toISOString().split('T')[0];
+loadStatus();
+</script>
+</body>
+</html>

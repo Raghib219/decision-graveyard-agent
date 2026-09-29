@@ -1,0 +1,501 @@
+{
+  "company": "Nimbus Retail",
+  "description": "Synthetic decision history for Decision Graveyard Agent demo.",
+  "decisions": [
+    {
+      "decision_id": "DEC-001",
+      "date": "2025-08-12",
+      "team": "Platform Engineering",
+      "proposal": "Migrate all backend services into a single monorepo to simplify cross-service refactors and unify CI.",
+      "outcome": "reverted",
+      "duration_before_reversal": "6 weeks",
+      "reasoning_for": [
+        "Cross-service refactors currently require coordinating 4 separate PRs",
+        "Single CI pipeline would reduce config duplication"
+      ],
+      "reasoning_against": [
+        "CI p95 build time went from 4m10s to 14m30s",
+        "No team was assigned ownership of the monorepo tooling",
+        "New hire onboarding time increased because repo size overwhelmed local dev setup"
+      ],
+      "key_people": ["Priya Nair (raised reversal, Staff Eng)", "Dev Malhotra (original champion, Eng Manager)"],
+      "outcome_evidence": "CI p95 build time metrics; all-hands complaint thread with 23 replies before reversal",
+      "tags": ["architecture", "tooling", "ci-cd", "monorepo"]
+    },
+    {
+      "decision_id": "DEC-002",
+      "date": "2026-06-03",
+      "team": "Platform Engineering",
+      "proposal": "Extract shared UI components into a separate internal package to reduce duplicate frontend code across 3 product teams.",
+      "outcome": "succeeded",
+      "reasoning_for": [
+        "3 teams maintaining near-identical button/modal/form components",
+        "Design system inconsistency causing UX bugs"
+      ],
+      "reasoning_against": [
+        "Initial concern about version-locking teams to the same release cadence"
+      ],
+      "key_people": ["Priya Nair (led implementation)", "Wren Ostrowski (Design lead)"],
+      "outcome_evidence": "Reduced duplicate component code by ~40%; versioning concern addressed with semver + changelog discipline, no major incidents in first 3 months",
+      "tags": ["architecture", "tooling", "frontend", "shared-code"]
+    },
+    {
+      "decision_id": "DEC-003",
+      "date": "2025-04-22",
+      "team": "Sales (SDR)",
+      "proposal": "Relaunch outbound cold-calling for enterprise leads to supplement inbound pipeline.",
+      "outcome": "reverted",
+      "duration_before_reversal": "8 weeks",
+      "reasoning_for": [
+        "Inbound pipeline down 18% quarter over quarter",
+        "Enterprise deals historically close faster with a live conversation"
+      ],
+      "reasoning_against": [
+        "Response rate measured at 0.4%, well below the 2% floor set for the pilot",
+        "Multiple prospects flagged lead fatigue from repeated contact by other channels",
+        "3 formal opt-out complaints filed with legal in the pilot's first month"
+      ],
+      "key_people": ["Marcus Webb (SDR Lead, ran the pilot)", "Ana Torres (VP Sales, called the reversal)"],
+      "outcome_evidence": "Pilot dashboard: 1,140 dials, 4.6 response rate percent target missed; 3 opt-out complaints",
+      "tags": ["sales", "outbound", "cold-calling", "enterprise"]
+    },
+    {
+      "decision_id": "DEC-004",
+      "date": "2026-05-15",
+      "team": "Sales (SDR)",
+      "proposal": "Bring back outbound cold-calling, this time targeting only new-market enterprise accounts with no prior contact history.",
+      "outcome": "partially_adopted",
+      "reasoning_for": [
+        "Q3 2025 reversal was specifically tied to lead fatigue from over-contacted accounts",
+        "New-market accounts have zero prior touchpoints, so fatigue concern does not apply"
+      ],
+      "reasoning_against": [
+        "Team still lacked a clear playbook for objection handling on cold calls",
+        "Response rate improved to 1.8% but still below original 2% target"
+      ],
+      "key_people": ["Marcus Webb (proposed the narrower pilot)", "Ana Torres (approved limited 90-day trial)"],
+      "outcome_evidence": "Trial limited to 400 net-new accounts; response rate 1.8%, approved to continue at reduced scale with quarterly review",
+      "tags": ["sales", "outbound", "cold-calling", "enterprise"]
+    },
+    {
+      "decision_id": "DEC-005",
+      "date": "2024-11-08",
+      "team": "Marketing",
+      "proposal": "Shift 40% of paid social budget to short-form video ads on TikTok and Reels.",
+      "outcome": "succeeded",
+      "reasoning_for": [
+        "Static image ad CTR had declined 30% year over year",
+        "Competitor benchmarking showed video-first brands outperforming on CAC"
+      ],
+      "reasoning_against": [
+        "Concern that video production costs would offset media savings"
+      ],
+      "key_people": ["Jules Ferreira (Growth Marketing Lead)"],
+      "outcome_evidence": "CAC dropped 22% within two quarters; in-house production kept costs flat after first quarter ramp-up",
+      "tags": ["marketing", "paid-social", "video", "budget"]
+    },
+    {
+      "decision_id": "DEC-006",
+      "date": "2025-01-20",
+      "team": "Marketing",
+      "proposal": "Discontinue the monthly print catalog mailer to cut costs, replacing entirely with email.",
+      "outcome": "reverted",
+      "duration_before_reversal": "1 quarter",
+      "reasoning_for": [
+        "Print mailer cost $180K/quarter with declining measurable attribution",
+        "Email open rates for the same segment were healthy"
+      ],
+      "reasoning_against": [
+        "The 55+ customer segment (18% of revenue) showed a 31% order drop the quarter mailers stopped",
+        "Customer service tickets referencing 'I used to get the catalog' rose sharply"
+      ],
+      "key_people": ["Jules Ferreira (proposed cut)", "Ron Okafor (CFO, approved reinstatement after revenue dip)"],
+      "outcome_evidence": "Segment revenue analysis; reinstated at reduced print run (targeted to the 55+ segment only) the following quarter",
+      "tags": ["marketing", "print", "catalog", "budget", "customer-segment"]
+    },
+    {
+      "decision_id": "DEC-007",
+      "date": "2025-09-30",
+      "team": "Product",
+      "proposal": "Replace the multi-step checkout flow with a single-page checkout to reduce cart abandonment.",
+      "outcome": "succeeded",
+      "reasoning_for": [
+        "Cart abandonment rate at 68%, above industry benchmark of ~60%",
+        "Competitor analysis showed single-page checkout correlating with lower abandonment"
+      ],
+      "reasoning_against": [
+        "Concern that combining steps would overwhelm mobile users"
+      ],
+      "key_people": ["Sana Iqbal (Product Manager, Checkout)", "Leo Bramante (UX Research)"],
+      "outcome_evidence": "Abandonment dropped to 54% within 6 weeks; mobile-specific concern addressed with a collapsible-section mobile layout",
+      "tags": ["product", "checkout", "conversion", "ux"]
+    },
+    {
+      "decision_id": "DEC-008",
+      "date": "2026-02-11",
+      "team": "Product",
+      "proposal": "Add a mandatory account-creation step before checkout to improve customer data capture.",
+      "outcome": "reverted",
+      "duration_before_reversal": "3 weeks",
+      "reasoning_for": [
+        "Only 34% of purchases came from logged-in accounts, limiting personalization and retention marketing"
+      ],
+      "reasoning_against": [
+        "Cart abandonment spiked from 54% back up to 71% in the first week",
+        "Directly undid the single-page checkout win from DEC-007"
+      ],
+      "key_people": ["Sana Iqbal (flagged the regression)", "Priyanka Desai (VP Product, ordered rollback)"],
+      "outcome_evidence": "Abandonment metrics reverted within 72 hours of rollback; guest checkout with optional post-purchase account creation implemented instead",
+      "tags": ["product", "checkout", "conversion", "account-creation"]
+    },
+    {
+      "decision_id": "DEC-009",
+      "date": "2024-09-14",
+      "team": "DevOps",
+      "proposal": "Move from a single large nightly deploy to continuous deployment (multiple deploys per day).",
+      "outcome": "succeeded",
+      "reasoning_for": [
+        "Nightly deploys bundled 15-20 changes, making rollback attribution difficult",
+        "Incident post-mortems repeatedly cited 'unclear which change caused this'"
+      ],
+      "reasoning_against": [
+        "Concern about deploy fatigue and alert noise for on-call engineers"
+      ],
+      "key_people": ["Tomas Reyes (DevOps Lead)"],
+      "outcome_evidence": "Mean time to identify root cause dropped from 4.2 hours to 40 minutes; on-call alert volume addressed via smarter deploy-window batching",
+      "tags": ["devops", "ci-cd", "deployment", "incident-response"]
+    },
+    {
+      "decision_id": "DEC-010",
+      "date": "2025-03-02",
+      "team": "DevOps",
+      "proposal": "Introduce a mandatory 2-hour deploy freeze window around lunch to reduce on-call interruption fatigue.",
+      "outcome": "abandoned",
+      "reasoning_for": [
+        "On-call engineers reported deploy-related interruptions during lunch as a top complaint in the eng survey"
+      ],
+      "reasoning_against": [
+        "Freeze window pushed deploys into a backlog that caused a larger batch effect in the afternoon, reintroducing DEC-009's original problem",
+        "No measurable change in reported on-call satisfaction after 1 month"
+      ],
+      "key_people": ["Tomas Reyes (proposed and later withdrew it)"],
+      "outcome_evidence": "Afternoon deploy batch size increased 3x during the trial; survey scores unchanged; proposal quietly dropped without formal reversal meeting",
+      "tags": ["devops", "deployment", "on-call", "process"]
+    },
+    {
+      "decision_id": "DEC-011",
+      "date": "2026-01-19",
+      "team": "Customer Support",
+      "proposal": "Deploy a fully automated chatbot to handle all tier-1 support tickets with no human fallback option.",
+      "outcome": "reverted",
+      "duration_before_reversal": "4 weeks",
+      "reasoning_for": [
+        "Tier-1 tickets (password resets, order status) made up 62% of volume and were largely repetitive",
+        "Support team was over capacity, with average first-response time at 6 hours"
+      ],
+      "reasoning_against": [
+        "CSAT for bot-only interactions dropped to 2.1/5 vs. 4.3/5 for human-assisted",
+        "Customers with edge-case issues had no escalation path and posted publicly on social media"
+      ],
+      "key_people": ["Grace Adeyemi (Support Ops Lead)", "Ron Okafor (CFO, approved emergency budget for reversal)"],
+      "outcome_evidence": "CSAT dashboard; 340 social media complaints tagged #NimbusSupport in one week",
+      "tags": ["support", "chatbot", "automation", "csat"]
+    },
+    {
+      "decision_id": "DEC-012",
+      "date": "2026-07-28",
+      "team": "Customer Support",
+      "proposal": "Deploy an AI assistant to triage and draft responses for tier-1 tickets, with mandatory human review before sending.",
+      "outcome": "succeeded",
+      "reasoning_for": [
+        "Directly addresses the no-escalation-path failure from DEC-011 by keeping a human in the loop",
+        "Reduces average handling time without removing human oversight"
+      ],
+      "reasoning_against": [
+        "Initial concern about reviewer fatigue from reviewing high ticket volume"
+      ],
+      "key_people": ["Grace Adeyemi (redesigned the approach)", "Marcus Webb (cross-team input from Sales on tone)"],
+      "outcome_evidence": "First-response time down to 1.8 hours, CSAT holding at 4.1/5; reviewer fatigue addressed by capping auto-drafts per reviewer per hour",
+      "tags": ["support", "ai-assistant", "automation", "csat"]
+    },
+    {
+      "decision_id": "DEC-013",
+      "date": "2025-06-17",
+      "team": "Data",
+      "proposal": "Consolidate all analytics tracking onto a single first-party data platform, sunsetting 3 third-party tools.",
+      "outcome": "partially_adopted",
+      "reasoning_for": [
+        "3 overlapping tools cost $210K/year combined with inconsistent metric definitions across teams"
+      ],
+      "reasoning_against": [
+        "One of the 3 tools (session replay) had no first-party equivalent with feature parity",
+        "Full migration timeline of 4 months was cut short at 2 months due to Q3 roadmap pressure"
+      ],
+      "key_people": ["Hana Kobayashi (Data Platform Lead)"],
+      "outcome_evidence": "2 of 3 tools successfully sunset, saving ~$140K/year; session replay tool retained on a reduced contract",
+      "tags": ["data", "analytics", "consolidation", "tooling"]
+    },
+    {
+      "decision_id": "DEC-014",
+      "date": "2024-08-05",
+      "team": "Ops (Fulfillment)",
+      "proposal": "Switch primary warehouse fulfillment partner to reduce per-order shipping cost.",
+      "outcome": "reverted",
+      "duration_before_reversal": "10 weeks",
+      "reasoning_for": [
+        "New partner quoted 12% lower per-order fulfillment cost"
+      ],
+      "reasoning_against": [
+        "Average delivery time increased from 2.1 to 4.6 days during peak season",
+        "Return rate for damaged items nearly doubled"
+      ],
+      "key_people": ["Deshawn Price (Ops Director)"],
+      "outcome_evidence": "Delivery time and damage-rate dashboards; reverted to original partner with a renegotiated rate instead",
+      "tags": ["operations", "fulfillment", "logistics", "cost-cutting"]
+    },
+    {
+      "decision_id": "DEC-015",
+      "date": "2025-11-22",
+      "team": "Ops (Fulfillment)",
+      "proposal": "Add a second regional fulfillment partner for West Coast orders only, keeping the original partner for all other regions.",
+      "outcome": "succeeded",
+      "reasoning_for": [
+        "Addresses the original per-order cost concern from DEC-014 without a full cutover",
+        "West Coast orders specifically suffered longest transit times under the single-partner model"
+      ],
+      "reasoning_against": [
+        "Concern about split inventory management complexity"
+      ],
+      "key_people": ["Deshawn Price (proposed the regional split)"],
+      "outcome_evidence": "West Coast delivery time down to 1.9 days; inventory split managed via existing WMS with no major incidents",
+      "tags": ["operations", "fulfillment", "logistics", "regional"]
+    },
+    {
+      "decision_id": "DEC-016",
+      "date": "2025-05-09",
+      "team": "Product",
+      "proposal": "Launch a paid loyalty/subscription tier offering free shipping and early access to sales.",
+      "outcome": "succeeded",
+      "reasoning_for": [
+        "Repeat purchase rate for top-quartile customers was 4x the platform average",
+        "Competitor loyalty programs showed strong retention lift"
+      ],
+      "reasoning_against": [
+        "Concern about cannibalizing existing free-shipping thresholds"
+      ],
+      "key_people": ["Priyanka Desai (VP Product)", "Ron Okafor (CFO, modeled the cannibalization risk)"],
+      "outcome_evidence": "18% of eligible customers enrolled in first quarter; free-shipping threshold cannibalization was within modeled range",
+      "tags": ["product", "loyalty", "subscription", "retention"]
+    },
+    {
+      "decision_id": "DEC-017",
+      "date": "2026-04-02",
+      "team": "Marketing",
+      "proposal": "Run a flash 24-hour sitewide 40% discount event to boost quarterly revenue.",
+      "outcome": "reverted",
+      "duration_before_reversal": "did not repeat after single event",
+      "reasoning_for": [
+        "Q2 revenue was tracking 8% below target with 3 weeks left in the quarter"
+      ],
+      "reasoning_against": [
+        "Discount attracted heavily price-sensitive one-time buyers with near-zero repeat rate",
+        "Margin loss on the event exceeded the revenue gain once returns were factored in",
+        "Cannibalized the following week's planned sales, which underperformed"
+      ],
+      "key_people": ["Jules Ferreira (approved as an emergency measure)", "Ron Okafor (flagged margin impact post-event)"],
+      "outcome_evidence": "Post-event margin analysis; repeat purchase rate from event buyers measured at 3% vs. 22% baseline",
+      "tags": ["marketing", "discounting", "promotion", "revenue"]
+    },
+    {
+      "decision_id": "DEC-018",
+      "date": "2026-08-14",
+      "team": "Marketing",
+      "proposal": "Run a flash sale framed as early access for loyalty-tier members only, at a smaller 15% discount.",
+      "outcome": "succeeded",
+      "reasoning_for": [
+        "Addresses the low-repeat-rate problem from DEC-017 by targeting existing loyal customers instead of the general public",
+        "Smaller discount reduces margin risk"
+      ],
+      "reasoning_against": [
+        "Concern that non-members would feel excluded and complain"
+      ],
+      "key_people": ["Jules Ferreira (redesigned the offer)", "Priyanka Desai (loyalty program tie-in)"],
+      "outcome_evidence": "Repeat purchase rate from event buyers at 19%, close to baseline; complaint volume from non-members negligible",
+      "tags": ["marketing", "discounting", "promotion", "loyalty"]
+    },
+    {
+      "decision_id": "DEC-019",
+      "date": "2024-12-01",
+      "team": "Platform Engineering",
+      "proposal": "Migrate primary database from PostgreSQL to a distributed NoSQL store to handle scaling concerns.",
+      "outcome": "abandoned",
+      "reasoning_for": [
+        "Projected 3x order volume growth over the next 18 months",
+        "Concerns about write throughput at current scale"
+      ],
+      "reasoning_against": [
+        "Proof-of-concept migration revealed the actual bottleneck was unindexed queries, not the database engine itself",
+        "Estimated migration cost and risk (6+ months, full data layer rewrite) far exceeded the cost of query optimization"
+      ],
+      "key_people": ["Priya Nair (ran the proof-of-concept)", "Dev Malhotra (proposed original migration)"],
+      "outcome_evidence": "Query optimization and read-replica scaling resolved throughput concerns at a fraction of the cost; proposal shelved before full migration began",
+      "tags": ["architecture", "database", "scaling", "postgresql"]
+    },
+    {
+      "decision_id": "DEC-020",
+      "date": "2025-10-06",
+      "team": "Sales (Enterprise)",
+      "proposal": "Introduce usage-based pricing as an alternative to flat annual contracts for enterprise clients.",
+      "outcome": "partially_adopted",
+      "reasoning_for": [
+        "Several prospects cited flat annual pricing as a blocker during negotiation, preferring to pay for what they use"
+      ],
+      "reasoning_against": [
+        "Revenue forecasting became significantly harder for the finance team",
+        "Only 12% of eligible prospects actually chose the usage-based option once offered"
+      ],
+      "key_people": ["Ana Torres (VP Sales)", "Ron Okafor (CFO, flagged forecasting difficulty)"],
+      "outcome_evidence": "Offered as an optional tier rather than a replacement; forecasting handled via a hybrid model with a usage-based floor",
+      "tags": ["sales", "pricing", "enterprise", "contracts"]
+    },
+    {
+      "decision_id": "DEC-021",
+      "date": "2026-03-11",
+      "team": "Support",
+      "proposal": "Require customers to complete a satisfaction survey before closing any support ticket.",
+      "outcome": "reverted",
+      "duration_before_reversal": "2 weeks",
+      "reasoning_for": [
+        "CSAT response rate was too low to be statistically meaningful (approx. 8% of tickets)"
+      ],
+      "reasoning_against": [
+        "Mandatory survey created a friction point that delayed ticket closure and inflated handling time metrics",
+        "Support agents reported customers becoming frustrated at being blocked from closing their own issue"
+      ],
+      "key_people": ["Grace Adeyemi (Support Ops Lead)"],
+      "outcome_evidence": "Handling time metrics spiked 15% in 2 weeks; reverted to optional post-close survey with a follow-up email instead",
+      "tags": ["support", "csat", "survey", "process"]
+    },
+    {
+      "decision_id": "DEC-022",
+      "date": "2025-02-27",
+      "team": "Product",
+      "proposal": "Redesign the mobile app navigation from a tab bar to a hamburger menu to fit more top-level sections.",
+      "outcome": "reverted",
+      "duration_before_reversal": "5 weeks",
+      "reasoning_for": [
+        "Product roadmap wanted to add 3 new top-level sections that did not fit in the existing 5-tab bar"
+      ],
+      "reasoning_against": [
+        "Engagement with previously one-tap-away sections (Cart, Search) dropped 26% once hidden behind the hamburger menu",
+        "User research post-launch showed users perceived the app as harder to use despite no functional loss"
+      ],
+      "key_people": ["Sana Iqbal (Product Manager)", "Leo Bramante (UX Research, flagged the engagement drop)"],
+      "outcome_evidence": "In-app analytics on section engagement pre/post launch; reverted to tab bar with a condensed 5-section structure plus an overflow More tab",
+      "tags": ["product", "mobile", "navigation", "ux"]
+    },
+    {
+      "decision_id": "DEC-023",
+      "date": "2026-06-20",
+      "team": "Data",
+      "proposal": "Build an internal recommendation engine to replace the third-party product recommendation widget.",
+      "outcome": "succeeded",
+      "reasoning_for": [
+        "Third-party widget cost scaled with traffic and was becoming the single largest vendor line item",
+        "Team had accumulated enough first-party interaction data to train a competitive model"
+      ],
+      "reasoning_against": [
+        "Concern about the multi-month build timeline delaying the cost savings"
+      ],
+      "key_people": ["Hana Kobayashi (Data Platform Lead)"],
+      "outcome_evidence": "Click-through rate on recommendations matched the third-party baseline within 5%; vendor cost eliminated entirely after full rollout",
+      "tags": ["data", "recommendations", "personalization", "vendor-cost"]
+    },
+    {
+      "decision_id": "DEC-024",
+      "date": "2024-10-15",
+      "team": "DevOps",
+      "proposal": "Adopt a fully serverless architecture for the order-processing pipeline to reduce infrastructure costs.",
+      "outcome": "reverted",
+      "duration_before_reversal": "3 months",
+      "reasoning_for": [
+        "Order volume was highly seasonal, and serverless promised to eliminate idle-capacity cost during off-peak periods"
+      ],
+      "reasoning_against": [
+        "Cold-start latency during Black Friday traffic spikes caused a 90-second processing delay on a subset of orders",
+        "Debugging distributed serverless traces proved far harder than the team's existing monitoring tooling supported"
+      ],
+      "key_people": ["Tomas Reyes (DevOps Lead)"],
+      "outcome_evidence": "Black Friday incident report citing delayed order confirmations; reverted to containerized services with autoscaling instead",
+      "tags": ["devops", "serverless", "infrastructure", "cost"]
+    },
+    {
+      "decision_id": "DEC-025",
+      "date": "2026-09-01",
+      "team": "Platform Engineering",
+      "proposal": "Move the recommendation engine's inference workload to serverless functions, keeping the core order pipeline containerized.",
+      "outcome": "succeeded",
+      "reasoning_for": [
+        "Recommendation inference is stateless and bursty in a way order processing (DEC-024) is not, making it a better serverless fit",
+        "Avoids repeating the cold-start problem since recommendation latency tolerance is higher than checkout latency tolerance"
+      ],
+      "reasoning_against": [
+        "Minor concern about a new tooling surface for the team to monitor"
+      ],
+      "key_people": ["Hana Kobayashi (proposed the narrower scope)", "Tomas Reyes (signed off given the DEC-024 lessons)"],
+      "outcome_evidence": "Inference cost down 34%; no latency complaints in first 2 months",
+      "tags": ["devops", "serverless", "infrastructure", "recommendations"]
+    },
+    {
+      "decision_id": "DEC-026",
+      "date": "2025-07-08",
+      "team": "Ops (Fulfillment)",
+      "proposal": "Eliminate free returns for orders under $25 to reduce return-processing costs.",
+      "outcome": "reverted",
+      "duration_before_reversal": "6 weeks",
+      "reasoning_for": [
+        "Return processing cost on small orders often exceeded the order's own margin"
+      ],
+      "reasoning_against": [
+        "Customer complaints on social media and review sites spiked, specifically citing the policy as a reason to shop elsewhere",
+        "Conversion rate for orders under $25 dropped 11%, since the free-returns policy was itself a purchase driver"
+      ],
+      "key_people": ["Deshawn Price (Ops Director)", "Jules Ferreira (flagged the review/social sentiment impact)"],
+      "outcome_evidence": "Review sentiment analysis; conversion rate dashboard for the affected order-value segment",
+      "tags": ["operations", "returns", "policy", "cost-cutting"]
+    },
+    {
+      "decision_id": "DEC-027",
+      "date": "2026-02-24",
+      "team": "Data",
+      "proposal": "Introduce a company-wide standardized event-tracking taxonomy to fix inconsistent metric definitions across teams.",
+      "outcome": "succeeded",
+      "reasoning_for": [
+        "Marketing, Product, and Data teams were each calculating active user differently, causing conflicting reports in leadership meetings"
+      ],
+      "reasoning_against": [
+        "Concern about the migration effort required across every team's existing dashboards"
+      ],
+      "key_people": ["Hana Kobayashi (Data Platform Lead)", "Priyanka Desai (sponsored cross-team adoption)"],
+      "outcome_evidence": "All 3 teams migrated within one quarter; leadership reporting discrepancies eliminated",
+      "tags": ["data", "analytics", "taxonomy", "cross-team"]
+    },
+    {
+      "decision_id": "DEC-028",
+      "date": "2025-12-15",
+      "team": "Sales (Enterprise)",
+      "proposal": "Require all enterprise deals over $100K to go through a second-approver sign-off to reduce discounting inconsistency.",
+      "outcome": "partially_adopted",
+      "reasoning_for": [
+        "Discount depth on enterprise deals varied wildly rep-to-rep with no consistent rationale"
+      ],
+      "reasoning_against": [
+        "Added 2-3 days to average deal close time during the pilot, causing at least one deal to be lost to a competitor on timing",
+        "Reps reported the approval process as opaque with unclear criteria"
+      ],
+      "key_people": ["Ana Torres (VP Sales)"],
+      "outcome_evidence": "Deal-cycle time analysis; threshold raised to $250K and approval criteria published as a scorecard to address the opacity complaint",
+      "tags": ["sales", "pricing", "enterprise", "approval-process"]
+    }
+  ]
+}

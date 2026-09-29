@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, dev]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # ── lint + import checks ─────────────────────────────────────────────
+  lint:
+    name: Lint & Import Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check imports (all modules load cleanly)
+        env:
+          HINDSIGHT_API_KEY: dummy
+          HINDSIGHT_URL: https://api.hindsight.vectorize.io
+          BANK_ID: decision-graveyard
+          GROQ_API_KEY: dummy
+          GROQ_MODEL: qwen/qwen3.8-27b
+        run: |
+          python -c "import store, cache, logger, auth, ingest, retrieval, convert_to_nl"
+          echo "All modules imported successfully"
+
+      - name: Validate dataset (28 records)
+        run: |
+          python -c "
+          from convert_to_nl import convert_all
+          records = convert_all('data/dataset.json')
+          assert len(records) == 28, f'Expected 28, got {len(records)}'
+          print(f'Dataset OK: {len(records)} records')
+          "
+
+      - name: FastAPI app loads + routes check
+        env:
+          HINDSIGHT_API_KEY: dummy
+          GROQ_API_KEY: dummy
+        run: |
+          python -c "
+          import importlib.util, sys
+          spec = importlib.util.spec_from_file_location('main', 'main.py')
+          mod  = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(mod)
+          routes   = [r.path for r in mod.app.routes]
+          required = ['/check', '/check/stream', '/ingest', '/debt-score', '/log', '/status']
+          missing  = [r for r in required if r not in routes]
+          assert not missing, f'Missing routes: {missing}'
+          print('Routes OK:', required)
+          "
+
+  # ── docker build check ───────────────────────────────────────────────
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create stub .env for build
+        run: |
+          echo "HINDSIGHT_API_KEY=dummy" > .env
+          echo "GROQ_API_KEY=dummy" >> .env
+          echo "HINDSIGHT_URL=https://api.hindsight.vectorize.io" >> .env
+          echo "BANK_ID=decision-graveyard" >> .env
+          echo "GROQ_MODEL=qwen/qwen3.8-27b" >> .env
+
+      - name: Build Docker image
+        run: docker build -t decision-graveyard:ci .
+
+      - name: Verify image starts
+        run: |
+          docker run -d --name dg-test \
+            -e HINDSIGHT_API_KEY=dummy \
+            -e GROQ_API_KEY=dummy \
+            -e GROQ_MODEL=qwen/qwen3.8-27b \
+            -p 8000:8000 \
+            decision-graveyard:ci
+          sleep 8
+          curl -f http://localhost:8000/status || (docker logs dg-test && exit 1)
+          docker stop dg-test
+
+  # ── deploy to Railway (on push to main only) ─────────────────────────
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    needs: [lint, docker]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --detach

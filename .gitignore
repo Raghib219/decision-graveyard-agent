@@ -1,0 +1,27 @@
+# secrets
+.env
+.env.*
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.Python
+dist/
+build/
+.venv/
+venv/
+
+# data (persistent store — committed separately if needed)
+data/store.json
+
+# ide
+.vscode/
+.idea/
+*.swp
+
+# os
+.DS_Store
+Thumbs.db
